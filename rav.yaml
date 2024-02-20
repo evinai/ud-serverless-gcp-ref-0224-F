@@ -2,5 +2,25 @@ scripts:
   runserver: uvicorn src.main:app --reload
   installs: venv/bin/python -m pip install -r requirements.txt
   test: pytest src/tests.py
-  build: docker build
-  push: docker push
+  build: docker build -f Dockerfile -t ud-serverless-py .
+  empty-build: docker build -f Dockerfile.empty -t empty-py .
+  empty-shell: docker exec -it empty_py /bin/bash
+  empty-run: docker run -p 8001:8000 --rm --name empty-py -it empty-py
+  container_stage: docker run --e MODE=stage -p 8000:8000 --rm --name ud-serverless-py -it ud-serverless-py
+  container_prod: docker run -e PORT=8001 -e MODE=PRODA --env-file .env-prod -p 8000:8001 --rm --name ud-serverless-py -it ud-serverless-py
+  run: docker run --env-file .env-prod -p 8000:8000 --rm --name ud-serverless-py -it ud-serverless-py
+  build_run:
+    - rav run build
+    - rav run run
+  configure: 
+    - gcloud auth configure-docker us-central1-docker.pkg.dev
+    - gcloud artifacts repositories create ud-serverless-py-repo --repository-format=docker --location=us-central1
+
+  push: 
+    - docker build -f Dockerfile -t ud-serverless-py .
+    - docker tag ud-serverless-py us-central1-docker.pkg.dev/ud-serverless-gcp-0224/ud-serverless-py-repo/ud-serverless-py:latest
+    - docker tag ud-serverless-py us-central1-docker.pkg.dev/ud-serverless-gcp-0224/ud-serverless-py-repo/ud-serverless-py:0224
+    - docker push us-central1-docker.pkg.dev/ud-serverless-gcp-0224/ud-serverless-py-repo/ud-serverless-py --all-tags
+
+  deploy:
+    - gcloud run deploy ud-serverless-py-run --image=us-central1-docker.pkg.dev/ud-serverless-gcp-0224/ud-serverless-py-repo/ud-serverless-py:latest --allow-unauthenticated --region=us-central1 --project=ud-serverless-gcp-0224
