@@ -39,4 +39,4 @@ jobs:
               uses: docker/setup-buildx-action@v3
             - name: Build container image
               run: |
-                docker build -f Dockerfile -t serverless-py
+                docker buildx build -f Dockerfile -t ud-serverless-py
