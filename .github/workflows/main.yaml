@@ -40,3 +40,5 @@ jobs:
             - name: Build container image
               run: |
                 docker build -f Dockerfile -t ud-serverless-py .
+                docker tag ud-serverless-py us-central1-docker.pkg.dev/ud-serverless-gcp-0224/ud-serverless-py-repo/ud-serverless-py:latest
+                docker push us-central1-docker.pkg.dev/ud-serverless-gcp-0224/ud-serverless-py-repo/ud-serverless-py --all-tags
